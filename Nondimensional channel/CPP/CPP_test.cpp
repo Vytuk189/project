@@ -68,7 +68,7 @@ std::vector<std::vector<double>> invDbeta = {{ beta*beta,  0, 0},
 
 
 
-const int N = 50; // Number of points in x direction
+const int N = 200; // Number of points in x direction
 const int M = static_cast<int>(H / (L / N)); // Number of points in y direction
 const double h = L / N; // Space step
 
@@ -156,7 +156,7 @@ int main(){
 
     int counter = 0;
 
-    while (counter < 10000) {
+    while (counter < 400000) {
     
         double umax_now = 0.0;
         double vmax_now = 0.0;
