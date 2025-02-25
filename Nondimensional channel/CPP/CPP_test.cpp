@@ -2,6 +2,7 @@
 #include <vector>
 #include <cmath>
 #include <fstream>
+#include <string>
 
 std::vector<double> scaleVector(double scale, std::vector<double> vec) {
     std::vector<double> result(vec.size());
@@ -67,8 +68,8 @@ std::vector<std::vector<double>> invDbeta = {{ beta*beta,  0, 0},
 
 
 
-
-const int N = 200; // Number of points in x direction
+const int iter = 300000; // Number of iterations
+const int N = 400; // Number of points in x direction
 const int M = static_cast<int>(H / (L / N)); // Number of points in y direction
 const double h = L / N; // Space step
 
@@ -108,7 +109,8 @@ Matrix createInitialMatrix() {
 }
 
 void saveMatrix(const Matrix& past) {
-    std::ofstream file("past_array_CPP.txt");
+    std::string filename = "flowdata_channel_nondimensional_CPP_N" + std::to_string(N) + "_iter" + std::to_string(iter) + ".txt";
+    std::ofstream file(filename);
     for (const auto& row : past) {
         for (const auto& col : row) {
             file << "[ ";
@@ -122,12 +124,13 @@ void saveMatrix(const Matrix& past) {
 
      // Close the file
     file.close();
-    std::cout << "Data saved to " << "past_array_CPP.txt" << std::endl;
+    std::cout << "Data saved to " << filename << std::endl;
 
 }
 
 void saveResidues(const std::vector<std::vector<double>>& residues) {
-    std::ofstream file("residues_CPP.txt");
+    std::string filename = "residues_channel_nondimensional_CPP_N" + std::to_string(N) + "_iter" + std::to_string(iter) + ".txt";
+    std::ofstream file(filename);
 
     // Iterate through the matrix and write each element on a new line
     for (const auto& row : residues) {
@@ -156,7 +159,7 @@ int main(){
 
     int counter = 0;
 
-    while (counter < 400000) {
+    while (counter < iter) {
     
         double umax_now = 0.0;
         double vmax_now = 0.0;

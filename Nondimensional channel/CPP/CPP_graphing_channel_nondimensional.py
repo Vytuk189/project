@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 
 # Initialize a list to store rows
 data = []
-file_path = 'past_array_CPP.txt'
+file_path = 'past_array_CPP_N100_iter40.txt'
 # Open and read the file
 with open(file_path, 'r') as file:
     for line in file:
