@@ -1,3 +1,11 @@
+/*
+This is a MacCormack solver for 2D Poissel flow of incompressible Newtonian fluid
+between parallel plates
+
+The flow is solved for non-dimensional pressure and speeds
+*/
+
+
 #include <iostream>
 #include <vector>
 #include <cmath>
@@ -67,9 +75,9 @@ std::vector<std::vector<double>> invDbeta = {{ beta*beta,  0, 0},
                                              {  0       ,  0, 1}};                                       
 
 
-
+const double cfl = 0.5;
 const int iter = 300000; // Number of iterations
-const int N = 400; // Number of points in x direction
+const int N = 50; // Number of points in x direction
 const int M = static_cast<int>(H / (L / N)); // Number of points in y direction
 const double h = L / N; // Space step
 
@@ -109,7 +117,7 @@ Matrix createInitialMatrix() {
 }
 
 void saveMatrix(const Matrix& past) {
-    std::string filename = "flowdata_channel_nondimensional_CPP_N" + std::to_string(N) + "_iter" + std::to_string(iter) + ".txt";
+    std::string filename = "flowdata_channel_nondimensional_CPP_N" + std::to_string(N) + "_iter" + std::to_string(iter) + "_CFL" + std::to_string(cfl) + "_beta" + std::to_string(beta) + ".txt";
     std::ofstream file(filename);
     for (const auto& row : past) {
         for (const auto& col : row) {
@@ -129,7 +137,7 @@ void saveMatrix(const Matrix& past) {
 }
 
 void saveResidues(const std::vector<std::vector<double>>& residues) {
-    std::string filename = "residues_channel_nondimensional_CPP_N" + std::to_string(N) + "_iter" + std::to_string(iter) + ".txt";
+    std::string filename = "residues_channel_nondimensional_CPP_N" + std::to_string(N) + "_iter" + std::to_string(iter) + "_CFL" + std::to_string(cfl) + "_beta" + std::to_string(beta) + ".txt";
     std::ofstream file(filename);
 
     // Iterate through the matrix and write each element on a new line
@@ -179,7 +187,7 @@ int main(){
             }
         }
         
-        double tau = 0.5 * 1.0 / (((umax_now + std::sqrt(umax_now * umax_now + beta * beta)) / h) +
+        double tau = cfl * 1.0 / (((umax_now + std::sqrt(umax_now * umax_now + beta * beta)) / h) +
                                     ((vmax_now + std::sqrt(vmax_now * vmax_now + beta * beta)) / h) + 
                                     2.0 * nu * (1.0 / (h * h) + 1.0 / (h * h)));
     
@@ -309,7 +317,7 @@ int main(){
                 double inv_h = 1/h;
                 double inv_h_square = 1/(h*h);
                 std::vector<double> brack_hor = scaleVector(inv_h_square, subtractVectors( addVectors (W_right, W_left), scaleVector(2.0, W_this)  ) );
-                std::vector<double> brack_ver = scaleVector(inv_h_square, subtractVectors( addVectors (W_right, W_left), scaleVector(2.0, W_this)  ) );
+                std::vector<double> brack_ver = scaleVector(inv_h_square, subtractVectors( addVectors (W_up, W_down), scaleVector(2.0, W_this)  ) );
 
                 std::vector<double> temp = scaleVector(nu, multiplyMatrixWithVector(D, addVectors(brack_hor, brack_ver)));
 

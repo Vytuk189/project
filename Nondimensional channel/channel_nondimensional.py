@@ -32,8 +32,8 @@ Dbeta = np.array([[1/(beta**2), 0, 0],
 
 invDbeta = np.linalg.inv(Dbeta)
 
-
-N = 200 #No. of points in x direction
+iterations = 200000
+N = 50 #No. of points in x direction
 
 h = L/N #Space step
 M = int(H/h) #No. of points in y direction
@@ -82,7 +82,7 @@ deltasCorrect= np.zeros_like(initial_matrix)
 
 # while residuum < :
 
-while counter < 400000:
+while counter < iterations:
     
     u_speeds = np.array([[sub_array[1] for sub_array in row] for row in past])
     v_speeds = np.array([[sub_array[2] for sub_array in row] for row in past])
@@ -248,10 +248,10 @@ while counter < 400000:
     counter = counter + 1
     
 # Save the residues list to a text file
-np.savetxt('residues.txt', residues)
+np.savetxt('residues_channelnondimensional_N'+str(N)+'_iter'+str(iterations)+'_CFL05_Beta'+str(beta)+'.txt', residues)
 
 # Save the past array to a binary file
-np.save('past_array.npy', past)
+np.save('channel_nondimensional_N'+str(N)+'_iter'+str(iterations)+'_CFL05_Beta'+str(beta)+'.txt', past)
         
 
 

@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 
 # Initialize a list to store rows
 data = []
-file_path = 'past_array_CPP_N100_iter40.txt'
+file_path = 'flowdata_channel_nondimensional_CPP_N50_iter300000.txt'
 # Open and read the file
 with open(file_path, 'r') as file:
     for line in file:
@@ -117,7 +117,7 @@ plt.show()
 
 
 # Replace 'data.txt' with your filename
-data_res = np.loadtxt('residues_CPP.txt')
+data_res = np.loadtxt('residues_channel_nondimensional_CPP_N50_iter300000.txt')
 
 # Assuming the file has three columns:
 var1 = data_res[:, 0]
