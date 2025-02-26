@@ -1,15 +1,18 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+iterations = 100000
+N = 200 #No. of points in x direction
+
 # Load the residues list from the text file
 residues = []
-with open('residues.txt', 'r') as file:
+with open('residues_cylinder'+str(N)+'_iter'+str(iterations)+'.txt', 'r') as file:
     for line in file:
         # Assuming each line in the file is a string representation of a NumPy array
         residues.append(np.fromstring(line.strip(), sep=' '))
 
 # Load the  array from the binary file
-past = np.load('past_array.npy', allow_pickle=True)
+past = np.load('dataflow_cylinder_N'+str(N)+'_iter'+str(iterations)+'.npy', allow_pickle=True)
 
 # Create three 2D matrices to store the first, second, and third subelements
 pressures = np.empty_like(past, dtype=np.float64)

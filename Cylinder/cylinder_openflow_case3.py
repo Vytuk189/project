@@ -27,7 +27,7 @@ def inCircle(x, y, center_x, center_y, R):
 rho = 10 #Density
 #Square control area
 L = 2 #Length of area
-H = L #Height of area
+H = L/2 #Height of area
 Re = 1
 
 # 1/Re takes the same place in the formula with nondimensional values,
@@ -48,15 +48,15 @@ Dbeta = np.array([[1/(beta**2), 0, 0],
 
 invDbeta = np.linalg.inv(Dbeta)
 
-
-N = 50 #No. of points in x direction
-M = N #No. of points in y direction
+iterations = 100000
+N = 200 #No. of points in x direction
+M = int(N/2) #No. of points in y direction
 h = L/N #Space step
 
 
 #Defining obstacle - circle
-R = L/10
-center_x = L/2
+R = L/20
+center_x = L/3
 center_y = H/2
 
 #Nondimensional values
@@ -106,7 +106,7 @@ deltasCorrect= np.zeros_like(initial_matrix)
 
 # while residuum < :
 
-while counter < 10:
+while counter < iterations:
     u_speeds = np.array([[sub_array[1] for sub_array in row] for row in past])
     v_speeds = np.array([[sub_array[2] for sub_array in row] for row in past])
     
@@ -290,18 +290,18 @@ while counter < 10:
             predict[i,j][1] = W_predict[1]
             predict[i,j][2] = W_predict[2] 
             
-            #Pressure at walls
-            for k in range(0,N+3):
-                predict[k, 0][0] = predict[k, 1][0]
-                predict[k,-1][0] = predict[k,-2][0]
-                
-            #Left and right boundary
-            for m in range(0, M+1):
-                predict[0, m][1] = predict[1, m][1]
-                predict[-1, m][1] = predict[-2, m][1]
-                predict[0, m][2] = predict[1, m][2]
-                predict[-1, m][2] = predict[-2, m][2]
-            
+    #Pressure at walls
+    for k in range(0,N+3):
+        predict[k, 0][0] = predict[k, 1][0]
+        predict[k,-1][0] = predict[k,-2][0]
+        
+    #Left and right boundary
+    for m in range(0, M+1):
+        predict[0, m][1] = predict[1, m][1]
+        predict[-1, m][1] = predict[-2, m][1]
+        predict[0, m][2] = predict[1, m][2]
+        predict[-1, m][2] = predict[-2, m][2]
+        
                     
             
     #Corrector section
@@ -354,15 +354,6 @@ while counter < 10:
             past[i,j][2] = a*(past[i,j][2] + tau*deltaW[2])
             
     
-    suma = np.array([0,0,0])
-    for i in range(1,N+2):
-        for j in range(1,M):  
-            deltaW = 0.5*(deltasPredict[i,j]+deltasCorrect[i,j])
-            suma = suma + deltaW*deltaW
-            a = out_of_object[i,j]
-            past[i,j][0] = a*(past[i,j][0] + tau*deltaW[0])
-            past[i,j][1] = a*(past[i,j][1] + tau*deltaW[1])
-            past[i,j][2] = a*(past[i,j][2] + tau*deltaW[2])
             
     # Top and bottom border
     # Enforcing Neuman conditions 
@@ -408,10 +399,10 @@ while counter < 10:
     counter = counter + 1
     
 # Save the residues list to a text file
-np.savetxt('residues.txt', residues)
+np.savetxt('residues_cylinder3'+str(N)+'_iter'+str(iterations)+'.txt', residues)
 
 # Save the past array to a binary file
-np.save('past_array.npy', past)
+np.save('dataflow_cylinder3_N'+str(N)+'_iter'+str(iterations)+'.npy', past)
         
 
 
