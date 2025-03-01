@@ -76,8 +76,8 @@ std::vector<std::vector<double>> invDbeta = {{ beta*beta,  0, 0},
 
 
 const double cfl = 0.5;
-const int iter = 300000; // Number of iterations
-const int N = 200; // Number of points in x direction
+const int iter = 800000; // Number of iterations
+const int N = 50; // Number of points in x direction
 const int M = static_cast<int>(H / (L / N)); // Number of points in y direction
 const double h = L / N; // Space step
 
@@ -117,7 +117,7 @@ Matrix createInitialMatrix() {
 }
 
 void saveMatrix(const Matrix& past) {
-    std::string filename = "flowdata_channel_nondimensional_CPP_N" + std::to_string(N) + "_iter" + std::to_string(iter) + "_CFL05_beta1.txt";
+    std::string filename = "flowdata_channel_nondimensional_CPP_N" + std::to_string(N) + "_iter" + std::to_string(iter) + "_CFL05_beta"+std::to_string(beta)+".txt";
     std::ofstream file(filename);
     for (const auto& row : past) {
         for (const auto& col : row) {
@@ -137,7 +137,7 @@ void saveMatrix(const Matrix& past) {
 }
 
 void saveResidues(const std::vector<std::vector<double>>& residues) {
-    std::string filename = "residues_channel_nondimensional_CPP_N" + std::to_string(N) + "_iter" + std::to_string(iter) + "_CFL05_beta1.txt";
+    std::string filename = "residues_channel_nondimensional_CPP_N" + std::to_string(N) + "_iter" + std::to_string(iter) + "_CFL05_beta"+std::to_string(beta)+".txt";
     std::ofstream file(filename);
 
     // Iterate through the matrix and write each element on a new line
@@ -359,22 +359,24 @@ int main(){
 
 
         
-        double residual_p = std::sqrt(sums[0] / (tau * N * M));
-        double residual_u = std::sqrt(sums[1] / (tau * N * M));
-        double residual_v = std::sqrt(sums[2] / (tau * N * M));
+        double residual_p = std::sqrt(sums[0] / tau)/(N*M);
+        double residual_u = std::sqrt(sums[1] / tau)/(N*M);
+        double residual_v = std::sqrt(sums[2] / tau)/(N*M);
 
         residues.push_back({residual_p, residual_u, residual_v});
         
-        std::cout << "***************************************************************\n";
-        std::cout << "Iteration: " << counter << "\n";
-        std::cout << "U max: " << umax_now << "\n";
-        std::cout << "V max: " << vmax_now << "\n";
-        std::cout << "P max: " << p_max << "          P min:" << p_min << "\n";
-        std::cout << "Tau: " << tau << "\n";
-        std::cout << "Residuum u: " << residual_u << "\n";
-        std::cout << "Residuum v: " << residual_v << "\n";
-        std::cout << "Residuum p: " << residual_p << "\n";
-
+        if(counter%100 == 0) {
+            std::cout << "***************************************************************\n";
+            std::cout << "Case: N=" << N << ", beta=" << beta << "\n";
+            std::cout << "Iteration: " << counter << "/" << iter << "\n";
+            std::cout << "U max: " << umax_now << "\n";
+            std::cout << "V max: " << vmax_now << "\n";
+            std::cout << "P max: " << p_max << "          P min:" << p_min << "\n";
+            std::cout << "Tau: " << tau << "\n";
+            std::cout << "Residuum u: " << residual_u << "\n";
+            std::cout << "Residuum v: " << residual_v << "\n";
+            std::cout << "Residuum p: " << residual_p << "\n";
+        }
 
 
         counter++;
