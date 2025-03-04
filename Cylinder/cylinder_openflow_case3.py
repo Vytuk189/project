@@ -28,7 +28,7 @@ rho = 10 #Density
 #Square control area
 L = 2 #Length of area
 H = L/2 #Height of area
-Re = 1
+Re = 0.1
 
 # 1/Re takes the same place in the formula with nondimensional values,
 # as nu in the formula with dimensional values.
@@ -48,7 +48,7 @@ Dbeta = np.array([[1/(beta**2), 0, 0],
 
 invDbeta = np.linalg.inv(Dbeta)
 
-iterations = 100000
+iterations = 100
 N = 200 #No. of points in x direction
 M = int(N/2) #No. of points in y direction
 h = L/N #Space step
@@ -63,11 +63,11 @@ center_y = H/2
 u_in = 1
 p_in = 0
 
-# Create a matrix with (N+3) rows and (M+1) columns, each element is an array of 3 values
+# Create a matrix with (N+3) rows and (M+1) columns, each element is an array of 6 values
 initial_matrix = np.empty((N+3, M+1), dtype=object)
 
 # Assign each element as an array of 6 values
-# p, u, v, x, y, 
+# p, u, v, x, y, in/out of circle
         
 #Initial conditions
 for i in range(N+3):
@@ -290,17 +290,25 @@ while counter < iterations:
             predict[i,j][1] = W_predict[1]
             predict[i,j][2] = W_predict[2] 
             
-    #Pressure at walls
-    for k in range(0,N+3):
-        predict[k, 0][0] = predict[k, 1][0]
-        predict[k,-1][0] = predict[k,-2][0]
+    # Top and bottom border
+    # Enforcing Neuman conditions 
+    for i in range(0,N+3):
+        #Pressure/U speed/V speed dont change between the bottom (or top) two layers
+        predict[i, 0][0] = predict[i, 1][0]
+        predict[i,-1][0] = predict[i,-2][0]
+        predict[i, 0][1] = predict[i, 1][1]
+        predict[i,-1][1] = predict[i,-2][1]
+        predict[i, 0][2] = predict[i, 1][2]
+        predict[i,-1][2] = predict[i,-2][2]
         
-    #Left and right boundary
-    for m in range(0, M+1):
-        predict[0, m][1] = predict[1, m][1]
-        predict[-1, m][1] = predict[-2, m][1]
-        predict[0, m][2] = predict[1, m][2]
-        predict[-1, m][2] = predict[-2, m][2]
+        
+        
+    # Left and right boundary
+    # Dirichlet conditions are enforced from initial setup - 
+    # the scheme loop doesnt affect borders
+    
+    
+    
         
                     
             
@@ -399,7 +407,7 @@ while counter < iterations:
     counter = counter + 1
     
 # Save the residues list to a text file
-np.savetxt('residues_cylinder3'+str(N)+'_iter'+str(iterations)+'.txt', residues)
+np.savetxt('residues_cylinder3_N'+str(N)+'_iter'+str(iterations)+'.txt', residues)
 
 # Save the past array to a binary file
 np.save('dataflow_cylinder3_N'+str(N)+'_iter'+str(iterations)+'.npy', past)

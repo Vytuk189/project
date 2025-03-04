@@ -1,18 +1,18 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-iterations = 100000
+iterations = 100
 N = 200 #No. of points in x direction
 
 # Load the residues list from the text file
 residues = []
-with open('residues_cylinder'+str(N)+'_iter'+str(iterations)+'.txt', 'r') as file:
+with open('residues_cylinder3_N'+str(N)+'_iter'+str(iterations)+'.txt', 'r') as file:
     for line in file:
         # Assuming each line in the file is a string representation of a NumPy array
         residues.append(np.fromstring(line.strip(), sep=' '))
 
 # Load the  array from the binary file
-past = np.load('dataflow_cylinder_N'+str(N)+'_iter'+str(iterations)+'.npy', allow_pickle=True)
+past = np.load('dataflow_cylinder3_N'+str(N)+'_iter'+str(iterations)+'.npy', allow_pickle=True)
 
 # Create three 2D matrices to store the first, second, and third subelements
 pressures = np.empty_like(past, dtype=np.float64)
@@ -134,38 +134,38 @@ plt.show()
 
 
 
-# Define the function u = f(x)
-def f(x):
-    deltaP = -1.6
-    rho = 10
-    Re = 10
-    L = 2
-    H = 1
-    return deltaP/(2*rho*L)*Re*H*(x**2-x)  # Example function
+# # Define the function u = f(x)
+# def f(x):
+#     deltaP = -1.6
+#     rho = 10
+#     Re = 10
+#     L = 2
+#     H = 1
+#     return deltaP/(2*rho*L)*Re*H*(x**2-x)  # Example function
 
 
-# Generate y values (ranging from 0 to 1)
-y_values = np.linspace(0, 1, 100)
+# # Generate y values (ranging from 0 to 1)
+# y_values = np.linspace(0, 1, 100)
 
-# Calculate corresponding u values using the function
-u_values = f(y_values)
+# # Calculate corresponding u values using the function
+# u_values = f(y_values)
 
-# Create the plot
-plt.plot(u_values, y_values, linestyle='--', color='blue', label="teor." )
-#
-plt.scatter(u_speeds[-1, :], y_vals, color='red', marker='x', label="numer.")
+# # Create the plot
+# plt.plot(u_values, y_values, linestyle='--', color='blue', label="teor." )
+# #
+# plt.scatter(u_speeds[-1, :], y_vals, color='red', marker='x', label="numer.")
 
-plt.xlim(-0.005, 0.16)
+# plt.xlim(-0.005, 0.16)
 
-# Label the axes
-plt.xlabel('Horizontální rychlost U')
-plt.ylabel('y')
+# # Label the axes
+# plt.xlabel('Horizontální rychlost U')
+# plt.ylabel('y')
 
-# Show the plot
-plt.title('Porovnání teoretického a numerického řešení')
-plt.legend()
-plt.grid(True)
-plt.show()
+# # Show the plot
+# plt.title('Porovnání teoretického a numerického řešení')
+# plt.legend()
+# plt.grid(True)
+# plt.show()
 
 
 

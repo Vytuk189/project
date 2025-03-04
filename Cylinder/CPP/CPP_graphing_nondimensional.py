@@ -1,15 +1,34 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-# Load the residues list from the text file
-residues = []
-with open('residues.txt', 'r') as file:
-    for line in file:
-        # Assuming each line in the file is a string representation of a NumPy array
-        residues.append(np.fromstring(line.strip(), sep=' '))
 
-# Load the past array from the binary file
-past = np.load('past_array.npy', allow_pickle=True)
+# Initialize a list to store rows
+data = []
+file_path = 'flowdata_cylinder3_nondimensional_CPP_N500_iter100_CFL05_beta1.000000.txt'
+# Open and read the file
+with open(file_path, 'r') as file:
+    for line in file:
+        # Clean the line to remove extra spaces and newlines
+        line = line.strip()
+        # Split the line by ']' and process each element in brackets
+        elements = line.split('] [')
+        row = []
+        for element in elements:
+            # Remove the surrounding '[' and ']' characters
+            element = element.strip('[]')
+            # Convert the string elements into float and store them as numpy array
+            row.append(np.array([float(x) for x in element.split()]))
+        # Append the row (which is a list of numpy arrays) to data
+        data.append(row)
+
+# Convert the list of rows into a 2D numpy array (of numpy arrays, each of 5 values)
+past = np.empty((len(data), len(data[0])), dtype=object)
+
+# Assign the numpy arrays into the final 2D array
+for i in range(len(data)):
+    for j in range(len(data[i])):
+        past[i, j] = data[i][j]
+
 
 # Create three 2D matrices to store the first, second, and third subelements
 pressures = np.empty_like(past, dtype=np.float64)
@@ -95,17 +114,18 @@ plt.gca().set_aspect('equal', adjustable='box')  # Ensure axes are proportional
 plt.show()
 
 
-# Replace 'data.txt' with your filename
-data = np.loadtxt('residues.txt')
 
+
+# Replace 'data.txt' with your filename
+data_res = np.loadtxt('residues_cylinder3_nondimensional_CPP_N500_iter100_CFL05_beta1.000000.txt')
 
 # Assuming the file has three columns:
-var1 = data[:, 0]
-var2 = data[:, 1]
-var3 = data[:, 2]
+var1 = data_res[:, 0]
+var2 = data_res[:, 1]
+var3 = data_res[:, 2]
 
 # Create an iteration number vector (starting from 1)
-iterations = np.arange(1, data.shape[0] + 1)
+iterations = np.arange(1, data_res.shape[0] + 1)
 
 # Plot the variables
 plt.figure(figsize=(10, 6))
@@ -131,38 +151,40 @@ plt.show()
 
 
 
-# Define the function u = f(x)
-def f(x):
-    deltaP = -1.6
-    rho = 10
-    Re = 10
-    L = 2
-    H = 1
-    return deltaP/(2*rho*L)*Re*H*(x**2-x)  # Example function
+# # Define the function u = f(x)
+# def f(x):
+#     deltaP = -1.6
+#     rho = 10
+#     Re = 10
+#     L = 2
+#     H = 1
+#     return deltaP/(2*rho*L)*Re*H*(x**2-x)  # Example function
 
 
-# Generate y values (ranging from 0 to 1)
-y_values = np.linspace(0, 1, 100)
+# # Generate y values (ranging from 0 to 1)
+# y_values = np.linspace(0, 1, 100)
 
-# Calculate corresponding u values using the function
-u_values = f(y_values)
+# # Calculate corresponding u values using the function
+# u_values = f(y_values)
 
-# Create the plot
-plt.plot(u_values, y_values, linestyle='--', color='blue', label="teor." )
-#
-plt.scatter(u_speeds[-1, :], y_vals, color='red', marker='x', label="numer.")
+# # Create the plot
+# plt.plot(u_values, y_values, linestyle='--', color='blue', label="teor." )
+# #
 
-plt.xlim(-0.005, 0.16)
+# u_speeds_plot = u_speeds[-1, :]
+# plt.scatter(u_speeds_plot, y_vals, color='red', marker='x', label="numer.")
 
-# Label the axes
-plt.xlabel('Horizontální rychlost U')
-plt.ylabel('y')
+# plt.xlim(-0.005, 0.16)
 
-# Show the plot
-plt.title('Porovnání teoretického a numerického řešení')
-plt.legend()
-plt.grid(True)
-plt.show()
+# # Label the axes
+# plt.xlabel('Horizontální rychlost U')
+# plt.ylabel('y')
+
+# # Show the plot
+# plt.title('Porovnání teoretického a numerického řešení')
+# plt.legend()
+# plt.grid(True)
+# plt.show()
 
 
 

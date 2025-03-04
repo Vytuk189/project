@@ -1,6 +1,5 @@
 /*
-This is a MacCormack solver for 2D Poissel flow of incompressible Newtonian fluid
-between parallel plates
+This is a MacCormack solver for 2D Poissel flow of incompressible Newtonian fluid around a cylinder in an openflow
 
 The flow is solved for non-dimensional pressure and speeds
 */
@@ -11,6 +10,7 @@ The flow is solved for non-dimensional pressure and speeds
 #include <cmath>
 #include <fstream>
 #include <string>
+
 
 std::vector<double> scaleVector(double scale, std::vector<double> vec) {
     std::vector<double> result(vec.size());
@@ -53,7 +53,7 @@ std::vector<double> multiplyMatrixWithVector(const std::vector<std::vector<doubl
 
 
 // Flow and channel conditions
-const double rho = 10.0; // Density
+const double rho = 1.0; // Density
 const double L = 2.0; // Length of channel
 const double H = 1.0; // Height of channel
 const double Re = 0.01;
@@ -80,8 +80,8 @@ std::vector<std::vector<double>> invDbeta = {{ beta*beta,  0, 0},
 
 
 const double cfl = 0.5;
-const int iter = 100; // Number of iterations
-const int N = 50; // Number of points in x direction
+const int iter = 800000; // Number of iterations
+const int N = 500; // Number of points in x direction
 const int M = static_cast<int>(H / (L / N)); // Number of points in y direction
 const double h = L / N; // Space step
 
@@ -89,39 +89,54 @@ const double u_in = 1.0;
 const double p_in = 0.0;
 const double p_out = 0.0;
 
-using Matrix = std::vector<std::vector<std::vector<double>>>;
+const double center_x = L/3;
+const double center_y = H/2;
+const double R = L/20;
 
+using Matrix = std::vector<std::vector<std::vector<double>>>;
+// Create a matrix with (N+3) rows and (M+1) columns, each element is an array of 6 values
+// # Assign each element as an array of 6 values - p, u, v, x, y, in/out of circle
 Matrix createInitialMatrix() {
-    Matrix initial_matrix(N + 3, std::vector<std::vector<double>>(M + 1, std::vector<double>(5, 0.0)));
+    Matrix initial_matrix(N + 3, std::vector<std::vector<double>>(M + 1, std::vector<double>(6, 0.0)));
+
+    double distance = 0.0;
+    double fluid = 1.0;
     
     for (int i = 0; i < N + 3; ++i) {
         for (int j = 0; j < M + 1; ++j) {
             double x = -h + i * h;
             double y = j * h;
-            double p = 0.0;
+
+            // Initializes the area uniformly
+            double p = p_in;
             double u = u_in;
             double v = 0.;
-            
-            if (i == 0) p = p_in;
-            if (i == N + 2) p = p_out;
-            if (j == 0 || j == M) { // no-slip condition
-                u = 0.0;
-                v = 0.0;
+
+            fluid = 1.0;
+
+            // Calculate the distance between the point (x, y) and the center (center_x, center_y)
+            distance = std::sqrt((x - center_x) * (x - center_x) + (y - center_y) * (y - center_y));
+
+            // Check if the point is within the circle
+            if (distance <= R) {
+                fluid = 0.0;  // The point is inside the circle
             }
+        
             
             initial_matrix[i][j][0] = p;
             initial_matrix[i][j][1] = u;
             initial_matrix[i][j][2] = v;
             initial_matrix[i][j][3] = x;
             initial_matrix[i][j][4] = y;
+            initial_matrix[i][j][5] = fluid;
         }
     }
     
     return initial_matrix;
 }
 
-void saveMatrix(const Matrix& past) {
-    std::string filename = "flowdata_channel_nondimensional_CPP_N" + std::to_string(N) + "_iter" + std::to_string(iter) + "_CFL05_beta"+std::to_string(beta)+".txt";
+void saveMatrix(const Matrix& past, int iter_number) {
+    std::string filename = "flowdata_cylinder3_nondimensional_CPP_N" + std::to_string(N) + "_iter" + std::to_string(iter_number) + "_CFL05_beta"+std::to_string(beta)+".txt";
     std::ofstream file(filename);
     for (const auto& row : past) {
         for (const auto& col : row) {
@@ -140,8 +155,8 @@ void saveMatrix(const Matrix& past) {
 
 }
 
-void saveResidues(const std::vector<std::vector<double>>& residues) {
-    std::string filename = "residues_channel_nondimensional_CPP_N" + std::to_string(N) + "_iter" + std::to_string(iter) + "_CFL05_beta"+std::to_string(beta)+".txt";
+void saveResidues(const std::vector<std::vector<double>>& residues, int iter_number) {
+    std::string filename = "residues_cylinder3_nondimensional_CPP_N" + std::to_string(N) + "_iter" + std::to_string(iter_number) + "_CFL05_beta"+std::to_string(beta)+".txt";
     std::ofstream file(filename);
 
     // Iterate through the matrix and write each element on a new line
@@ -170,7 +185,7 @@ int main(){
 
 
     int counter = 0;
-
+    double a = 1;
     while (counter < iter) {
     
         double umax_now = 0.0;
@@ -260,9 +275,9 @@ int main(){
                     predict[i][j][k] = past[i][j][k] + tau * deltaWpredict[k];
                 }
             }
-
         }
-
+ 
+        /* Old conditions from channel flow
         //Boundary conditions for predict matrix
         // Pressure at walls
         for (int k = 0; k < N + 3; ++k) {
@@ -278,9 +293,29 @@ int main(){
             predict[0][m][2] = predict[1][m][2];          // Left boundary for third component
             predict[N + 2][m][2] = predict[N + 1][m][2];  // Right boundary for third component
         }
-            
+        */
+
+        // Top and bottom border
+        // Enforcing Neuman Conditions
+        for (int k = 0; k < N + 3; ++k) {
+            // Pressure/U speed/V speed dont change between the bottom (or top) two layers
+            predict[k][0][0] = predict[k][1][0];          // Bottom boundary condition
+            predict[k][M][0] = predict[k][M-1][0];      // Top  boundary condition
+            predict[k][0][1] = predict[k][1][1];          // Bottom boundary condition
+            predict[k][M][1] = predict[k][M-1][1];      // Top  boundary condition
+            predict[k][0][2] = predict[k][1][2];          // Bottom boundary condition
+            predict[k][M][2] = predict[k][M-1][2];      // Top  boundary condition
+        }
         
+        /* 
+         Left and right boundary
+         Dirichlet conditions are enforced from initial setup - 
+         the scheme loop doesnt affect borders
         
+        */
+
+
+
         // Corrector section
         for (int i = 1; i < N + 2; ++i) {
             for (int j = 1; j < M; ++j) {
@@ -338,29 +373,36 @@ int main(){
                 sums[0] += deltaW[0] * deltaW[0];
                 sums[1] += deltaW[1] * deltaW[1];
                 sums[2] += deltaW[2] * deltaW[2];
-                past[i][j][0] = past[i][j][0] + tau*deltaW[0];
-                past[i][j][1] = past[i][j][1] + tau*deltaW[1];
-                past[i][j][2] = past[i][j][2] + tau*deltaW[2];
+                a = initial_matrix[i][j][5];
+                past[i][j][0] = a*(past[i][j][0] + tau*deltaW[0]);
+                past[i][j][1] = a*(past[i][j][1] + tau*deltaW[1]);
+                past[i][j][2] = a*(past[i][j][2] + tau*deltaW[2]);
 
 
             }
         }
 
-        //Boundary conditions for past matrix
-        // Pressure at walls
+
+         // Top and bottom border
+        // Enforcing Neuman Conditions
         for (int k = 0; k < N + 3; ++k) {
-            past[k][0][0] = past[k][1][0];          // Bottom wall boundary condition
-            past[k][M][0] = past[k][M-1][0];      // Top wall boundary condition
+            // Pressure/U speed/V speed dont change between the bottom (or top) two layers
+            past[k][0][0] = past[k][1][0];          // Bottom boundary condition
+            past[k][M][0] = past[k][M-1][0];      // Top  boundary condition
+            past[k][0][1] = past[k][1][1];          // Bottom boundary condition
+            past[k][M][1] = past[k][M-1][1];      // Top  boundary condition
+            past[k][0][2] = past[k][1][2];          // Bottom boundary condition
+            past[k][M][2] = past[k][M-1][2];      // Top  boundary condition
         }
+        
+        /* 
+         Left and right boundary
+         Dirichlet conditions are enforced from initial setup - 
+         the scheme loop doesnt affect borders
 
-        // Left and right boundary conditions
-        for (int m = 0; m <= M; ++m) {
-            past[0][m][1] = past[1][m][1];          // Left boundary for second component
-            past[N + 2][m][1] = past[N + 1][m][1];  // Right boundary for second component
+        */
 
-            past[0][m][2] = past[1][m][2];          // Left boundary for third component
-            past[N + 2][m][2] = past[N + 1][m][2];  // Right boundary for third component
-        }
+
         
 
 
@@ -371,17 +413,20 @@ int main(){
 
         residues.push_back({residual_p, residual_u, residual_v});
         
-        if(counter%100 == 0) {
-            std::cout << "***************************************************************\n";
-            std::cout << "Case: N=" << N << ", beta=" << beta << "\n";
-            std::cout << "Iteration: " << counter << "/" << iter << "\n";
-            std::cout << "U max: " << umax_now << "\n";
-            std::cout << "V max: " << vmax_now << "\n";
-            std::cout << "P max: " << p_max << "          P min:" << p_min << "\n";
-            std::cout << "Tau: " << tau << "\n";
-            std::cout << "Residuum u: " << residual_u << "\n";
-            std::cout << "Residuum v: " << residual_v << "\n";
-            std::cout << "Residuum p: " << residual_p << "\n";
+        std::cout << "***************************************************************\n";
+        std::cout << "Case: N=" << N << ", beta=" << beta << "\n";
+        std::cout << "Iteration: " << counter << "/" << iter << "\n";
+        std::cout << "U max: " << umax_now << "\n";
+        std::cout << "V max: " << vmax_now << "\n";
+        std::cout << "P max: " << p_max << "          P min:" << p_min << "\n";
+        std::cout << "Tau: " << tau << "\n";
+        std::cout << "Residuum u: " << residual_u << "\n";
+        std::cout << "Residuum v: " << residual_v << "\n";
+        std::cout << "Residuum p: " << residual_p << "\n";
+
+        if(counter % 50000 == 0){
+            saveMatrix(past, counter);
+            saveResidues(residues, counter);
         }
 
 
@@ -389,8 +434,8 @@ int main(){
     }
     
 
-    saveMatrix(past);
-    saveResidues(residues);
+    saveMatrix(past, iter);
+    saveResidues(residues, iter);
 
     return 0;
 
