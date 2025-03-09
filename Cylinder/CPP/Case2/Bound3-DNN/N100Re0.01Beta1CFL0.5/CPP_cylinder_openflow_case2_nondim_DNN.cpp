@@ -4,6 +4,8 @@ This is a MacCormack solver for 2D Poissel flow of incompressible Newtonian flui
 The flow is solved for non-dimensional pressure and speeds
 
 The boundary conditions in this specific case are Dirichlet on the inflow, Neumann everywhere else (Case 3)
+
+The flow is viscous - cylinder is placed in the middle and the flow distortion should be more or less symetrical (wont be completely because of the assymetry in the boundary conditions)
 */
 
 
@@ -57,7 +59,7 @@ std::vector<double> multiplyMatrixWithVector(const std::vector<std::vector<doubl
 // Flow and channel conditions
 const double rho = 1.0; // Density
 const double L = 2.0; // Length of channel
-const double H = 1.0; // Height of channel
+const double H = 1.5; // Height of channel
 const double Re = 0.01;
 
 /* 1/Re takes the same place in the formula with nondimensional values,
@@ -83,7 +85,7 @@ std::vector<std::vector<double>> invDbeta = {{ beta*beta,  0, 0},
 
 const double cfl = 0.5;
 const int iter = 800000; // Number of iterations
-const int N = 100; // Number of points in x direction
+const int N = 200; // Number of points in x direction
 const int M = static_cast<int>(H / (L / N)); // Number of points in y direction
 const double h = L / N; // Space step
 
@@ -91,9 +93,9 @@ const double u_in = 1.0;
 const double p_in = 0.0;
 const double p_out = 0.0;
 
-const double center_x = L/3;
+const double center_x = L/2;
 const double center_y = H/2;
-const double R = L/40;
+const double R = L/20;
 
 using Matrix = std::vector<std::vector<std::vector<double>>>;
 // Create a matrix with (N+3) rows and (M+1) columns, each element is an array of 6 values
@@ -170,7 +172,7 @@ void saveResidues(const std::vector<std::vector<double>>& residues, int iter_num
 
     // Close the file
     file.close();
-    std::cout << "Residues saved to " << "residues_CPP.txt" << std::endl;
+    std::cout << "Residues saved to " << filename << std::endl;
 }
 
 
@@ -269,13 +271,10 @@ int main(){
 
                 //std::vector<double> W_predict = addVectors(W_predict, scaleVector(tau, deltaWpredict));
 
-
-
-                
-                // Update the predictor matrix
-                for (int k = 0; k < 3; ++k) {
-                    predict[i][j][k] = past[i][j][k] + tau * deltaWpredict[k];
-                }
+                a = initial_matrix[i][j][5];
+                predict[i][j][0] = past[i][j][0] + tau*deltaWpredict[0];
+                predict[i][j][1] = a*(past[i][j][1] + tau*deltaWpredict[1]);
+                predict[i][j][2] = a*(past[i][j][2] + tau*deltaWpredict[2]);
             }
         }
         
@@ -295,16 +294,22 @@ int main(){
             // Pressure/U speed/V speed dont change between the last layer and the layer before it
             predict[N+2][j][0] = predict[N+1][j][0];          
             predict[N+2][j][1] = predict[N+1][j][1];          
-            predict[N+2][j][2] = predict[N+1][j][2];     
+            predict[N+2][j][2] = predict[N+1][j][2]; 
+            
+            // Neumann condition on the left border
+            // Pressure doesnt change between the first and second layer
+            predict[0][j][0] = predict[1][j][0];
         }
 
 
         /* 
          Left boundary
-         Dirichlet conditions are enforced from initial setup - 
+         Dirichlet conditions for speed are enforced from initial setup - 
          the scheme loop doesnt affect borders
 
         */
+
+
 
 
 
@@ -392,6 +397,11 @@ int main(){
             past[N+2][j][0] = past[N+1][j][0];          
             past[N+2][j][1] = past[N+1][j][1];          
             past[N+2][j][2] = past[N+1][j][2];     
+
+            // Neumann condition on the left border
+            // Pressure doesnt change between the first and second layer
+            past[0][j][0] = past[1][j][0];
+
         }
 
 
@@ -426,7 +436,7 @@ int main(){
         std::cout << "Residuum p: " << residual_p << "\n";
         }
 
-        if(counter % 1000 == 0){
+        if(counter % 20000 == 0){
             saveMatrix(past, counter);
             saveResidues(residues, counter);
         }
