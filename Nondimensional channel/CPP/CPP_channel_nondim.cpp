@@ -56,7 +56,7 @@ std::vector<double> multiplyMatrixWithVector(const std::vector<std::vector<doubl
 const double rho = 10.0; // Density
 const double L = 2.0; // Length of channel
 const double H = 1.0; // Height of channel
-const double Re = 0.01;
+const double Re = 10;
 
 /* 1/Re takes the same place in the formula with nondimensional values,
      as nu in the formula with dimensional values.
@@ -80,13 +80,13 @@ std::vector<std::vector<double>> invDbeta = {{ beta*beta,  0, 0},
 
 
 const double cfl = 0.5;
-const int iter = 100; // Number of iterations
-const int N = 50; // Number of points in x direction
+const int iter = 800000; // Number of iterations
+const int N = 500; // Number of points in x direction
 const int M = static_cast<int>(H / (L / N)); // Number of points in y direction
 const double h = L / N; // Space step
 
 const double u_in = 1.0;
-const double p_in = 0.0;
+const double p_in = 1.6;
 const double p_out = 0.0;
 
 using Matrix = std::vector<std::vector<std::vector<double>>>;
@@ -120,8 +120,8 @@ Matrix createInitialMatrix() {
     return initial_matrix;
 }
 
-void saveMatrix(const Matrix& past) {
-    std::string filename = "flowdata_channel_nondimensional_CPP_N" + std::to_string(N) + "_iter" + std::to_string(iter) + "_CFL05_beta"+std::to_string(beta)+".txt";
+void saveMatrix(const Matrix& past, int counter) {
+    std::string filename = "flowdata_channel_nondimensional_CPP_N" + std::to_string(N) + "_iter" + std::to_string(counter) + "_CFL05_beta"+std::to_string(beta)+".txt";
     std::ofstream file(filename);
     for (const auto& row : past) {
         for (const auto& col : row) {
@@ -140,8 +140,8 @@ void saveMatrix(const Matrix& past) {
 
 }
 
-void saveResidues(const std::vector<std::vector<double>>& residues) {
-    std::string filename = "residues_channel_nondimensional_CPP_N" + std::to_string(N) + "_iter" + std::to_string(iter) + "_CFL05_beta"+std::to_string(beta)+".txt";
+void saveResidues(const std::vector<std::vector<double>>& residues, int counter) {
+    std::string filename = "residues_channel_nondimensional_CPP_N" + std::to_string(N) + "_iter" + std::to_string(counter) + "_CFL05_beta"+std::to_string(beta)+".txt";
     std::ofstream file(filename);
 
     // Iterate through the matrix and write each element on a new line
@@ -371,7 +371,7 @@ int main(){
 
         residues.push_back({residual_p, residual_u, residual_v});
         
-        if(counter%100 == 0) {
+        if(counter%10 == 0) {
             std::cout << "***************************************************************\n";
             std::cout << "Case: N=" << N << ", beta=" << beta << "\n";
             std::cout << "Iteration: " << counter << "/" << iter << "\n";
@@ -384,13 +384,17 @@ int main(){
             std::cout << "Residuum p: " << residual_p << "\n";
         }
 
+        if(counter%20000 == 0) {
+            saveMatrix(past, counter);
+            saveResidues(residues, counter);
+        }
+
 
         counter++;
     }
     
-
-    saveMatrix(past);
-    saveResidues(residues);
+    saveMatrix(past, iter);
+    saveResidues(residues, iter);
 
     return 0;
 

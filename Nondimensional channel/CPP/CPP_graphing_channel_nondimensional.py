@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 
 # Initialize a list to store rows
 data = []
-file_path = 'flowdata_channel_nondimensional_CPP_N50_iter800000_CFL05_beta1.000000.txt'
+file_path = 'flowdata_channel_nondimensional_CPP_N100_iter800000_CFL05_beta1.000000.txt'
 # Open and read the file
 with open(file_path, 'r') as file:
     for line in file:
@@ -135,7 +135,7 @@ plt.plot(iterations, var3, label='V Reziduum', color="green")
 
 # Set y-axis to logarithmic scale
 plt.yscale('log')
-plt.xlim(0, 300000)
+plt.xlim(0, 800000)
 
 # Labeling the plot
 plt.xlabel('Iterace')
