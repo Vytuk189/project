@@ -61,7 +61,7 @@ std::vector<double> multiplyMatrixWithVector(const std::vector<std::vector<doubl
 const double rho = 1.0; // Density
 const double L = 2.0; // Length of channel
 const double H = 1; // Height of channel
-const double Re = 200;
+const double Re = 80;
 
 /* 1/Re takes the same place in the formula with nondimensional values,
      as nu in the formula with dimensional values.
@@ -384,7 +384,7 @@ int main(){
 
                 sums[0] += (new_p - old_p)*(new_p - old_p);
                 sums[1] += (new_u - old_u)*(new_u - old_u);
-                sums[2] += (new_v - old_v)*(new_p - old_v);
+                sums[2] += (new_v - old_v)*(new_v - old_v);
 
 
                 past[i][j][0] = new_p;
