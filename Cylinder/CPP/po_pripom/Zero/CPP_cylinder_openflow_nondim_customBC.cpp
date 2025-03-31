@@ -61,7 +61,7 @@ std::vector<double> multiplyMatrixWithVector(const std::vector<std::vector<doubl
 const double rho = 1.0; // Density
 const double L = 2.0; // Length of channel
 const double H = 1; // Height of channel
-const double Re = 80;
+const double Re = 200;
 
 /* 1/Re takes the same place in the formula with nondimensional values,
      as nu in the formula with dimensional values.
@@ -86,7 +86,7 @@ std::vector<std::vector<double>> invDbeta = {{ beta*beta,  0, 0},
 
 const double cfl = 0.5;
 const int iter = 800000; // Number of iterations
-const int N = 160; // Number of points in x direction
+const int N = 100; // Number of points in x direction
 const int M = static_cast<int>(H / (L / N)); // Number of points in y direction
 const double h = L / N; // Space step
 
