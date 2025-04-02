@@ -4,15 +4,18 @@ from matplotlib.colors import ListedColormap
 
 case = 2
 bound = "Custom"
-N = 50
-iterations = 20000
-Re = 10
+N = 100
+iterations = 80000
+Re = 80
 
 # Initialize a list to store rows
 data = []
-file_path = 'flowdata_cylinder'+str(case)+'_nondimensional_CPP_N'+str(N)+'_iter'+str(iterations)+'_CFL05_beta1.000000.txt'
+file_path = 'flowdata_cylinder_nondimensional_N'+str(N)+'_Re'+str(Re)+'.000000_iter'+str(iterations)+'.txt'
 # Open and read the file
 with open(file_path, 'r') as file:
+    # Read the first line to get the double value
+    first_line = file.readline().strip()
+    time = float(first_line)
     for line in file:
         # Clean the line to remove extra spaces and newlines
         line = line.strip()
@@ -100,7 +103,7 @@ plt.gca().set_aspect('equal', adjustable='box')  # Ensure axes are proportional
 
 # Plot the second mesh, only where binary_data is 0, set color to white
 cmap_binary = ListedColormap(["none", "white"])
-plt.pcolormesh(X, Y, mask, shading='auto', cmap=cmap_binary)
+#plt.pcolormesh(X, Y, mask, shading='auto', cmap=cmap_binary)
 
 plt.show()
 
@@ -124,7 +127,7 @@ plt.ylabel('y')
 plt.gca().set_aspect('equal', adjustable='box')  # Ensure axes are proportional
 # Plot the second mesh, only where binary_data is 0, set color to white
 cmap_binary = ListedColormap(["none", "white"])
-plt.pcolormesh(X, Y, mask, shading='auto', cmap=cmap_binary)
+#plt.pcolormesh(X, Y, mask, shading='auto', cmap=cmap_binary)
 
 plt.show()
 
@@ -147,14 +150,14 @@ plt.ylabel('y')
 plt.gca().set_aspect('equal', adjustable='box')  # Ensure axes are proportional
 # Plot the second mesh, only where binary_data is 0, set color to white
 cmap_binary = ListedColormap(["none", "white"])
-plt.pcolormesh(X, Y, mask, shading='auto', cmap=cmap_binary)
+#plt.pcolormesh(X, Y, mask, shading='auto', cmap=cmap_binary)
 plt.show()
 
 
 
 
 # Replace 'data.txt' with your filename
-data_res = np.loadtxt('residues_cylinder'+str(case)+'_nondimensional_CPP_N'+str(N)+'_iter'+str(iterations)+'_CFL05_beta1.000000.txt')
+data_res = np.loadtxt('residues_cylinder_nondimensional_N'+str(N)+'_Re'+str(Re)+'.000000_iter'+str(iterations)+'.txt')
 
 # Assuming the file has three columns:
 var1 = data_res[:, 0]

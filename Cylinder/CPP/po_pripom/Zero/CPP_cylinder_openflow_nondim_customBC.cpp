@@ -162,8 +162,29 @@ void saveMatrix(const Matrix& past, int iter_number) {
 
 }
 
+void saveMatrixWithTime(const Matrix& past, int iter_number, double time) {
+    std::string filename = "flowdata_cylinder_nondimensional_N" + std::to_string(N) + "_Re"+std::to_string(Re)+"_iter" + std::to_string(iter_number) + ".txt";
+    std::ofstream file(filename);
+    file << time << std::endl;
+    for (const auto& row : past) {
+        for (const auto& col : row) {
+            file << "[ ";
+            for (double val : col) {
+                file << val << " ";
+            }
+            file << "] ";
+        }
+       file << std::endl; 
+    }
+
+     // Close the file
+    file.close();
+    std::cout << "Data saved to " << filename << std::endl;
+}
+
+
 void saveResidues(const std::vector<std::vector<double>>& residues, int iter_number) {
-    std::string filename = "residues_cylinder2_nondimensional_CPP_N" + std::to_string(N) + "_Re"+std::to_string(Re)+"_iter" + std::to_string(iter_number) + "_CFL05.txt";
+    std::string filename = "residues_cylinder_nondimensional_N" + std::to_string(N) + "_Re"+std::to_string(Re)+"_iter" + std::to_string(iter_number) + ".txt";
     std::ofstream file(filename);
 
     // Iterate through the matrix and write each element on a new line
@@ -192,6 +213,7 @@ int main(){
 
 
     int counter = 0;
+    double time = 0;
     double a = 1; //Will store whether a point is in fluid or in circle
     while (counter < iter) {
     
@@ -438,6 +460,7 @@ int main(){
 
         residues.push_back({residual_p, residual_u, residual_v});
         
+        time = time + tau;
         if(counter % 10 == 0){
         std::cout << "***************************************************************\n";
         std::cout << "Case Custom BC: N=" << N << ", M=" << M << ", L=" << L << ", H=" << H << ", Re=" << Re << ", beta=" << beta <<  "\n";
@@ -451,18 +474,19 @@ int main(){
         std::cout << "Residuum p: " << residual_p << "\n";
         }
 
-        if(counter % 20000 == 0){
-            saveMatrix(past, counter);
+        if(counter % 10000 == 0){
+            //saveMatrix(past, counter);
+            saveMatrixWithTime(past, counter, time);
+        }
+
+        if(counter % 10000 == 0){
             saveResidues(residues, counter);
         }
 
 
+
         counter++;
     }
-    
-
-    saveMatrix(past, iter);
-    saveResidues(residues, iter);
 
     return 0;
 

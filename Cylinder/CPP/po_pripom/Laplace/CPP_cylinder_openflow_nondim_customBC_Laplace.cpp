@@ -3,7 +3,7 @@ This is a MacCormack solver for 2D Poissel flow of incompressible Newtonian flui
 
 The flow is solved for non-dimensional pressure and speeds
 
-The continuity equation has a laplacian of pressure on the right hand side
+The continuity equation with artificial compressibility and laplace of pressure on the right hand side
 
 The boundary conditions in this specific case are give the supervisors instruction - Zero pressure gradient at left, top, bottom boundary, dirichlet on the right boundary
                                                                                    - Dirichlet velocity on the intake, zero velocity gradient everywhere else
@@ -63,7 +63,7 @@ std::vector<double> multiplyMatrixWithVector(const std::vector<std::vector<doubl
 const double rho = 1.0; // Density
 const double L = 2.0; // Length of channel
 const double H = 1; // Height of channel
-const double Re = 10;
+const double Re = 40;
 
 /* 1/Re takes the same place in the formula with nondimensional values,
      as nu in the formula with dimensional values.
@@ -86,9 +86,9 @@ std::vector<std::vector<double>> invDbeta = {{ beta*beta,  0, 0},
                                              {  0       ,  0, 1}};                                       
 
 
-const double cfl = 0.5;
+const double cfl = 0.1;
 const int iter = 800000; // Number of iterations
-const int N = 50; // Number of points in x direction
+const int N = 100; // Number of points in x direction
 const int M = static_cast<int>(H / (L / N)); // Number of points in y direction
 const double h = L / N; // Space step
 
@@ -144,8 +144,29 @@ Matrix createInitialMatrix() {
     return initial_matrix;
 }
 
+void saveMatrixWithTime(const Matrix& past, int iter_number, double time) {
+    std::string filename = "flowdata_cylinder_nondimensional_N" + std::to_string(N) + "_Re"+std::to_string(Re)+"_iter" + std::to_string(iter_number) + ".txt";
+    std::ofstream file(filename);
+    file << time << std::endl;
+    for (const auto& row : past) {
+        for (const auto& col : row) {
+            file << "[ ";
+            for (double val : col) {
+                file << val << " ";
+            }
+            file << "] ";
+        }
+       file << std::endl; 
+    }
+
+     // Close the file
+    file.close();
+    std::cout << "Data saved to " << filename << std::endl;
+
+}
+
 void saveMatrix(const Matrix& past, int iter_number) {
-    std::string filename = "flowdata_cylinder2_nondimensional_CPP_N" + std::to_string(N) + "_iter" + std::to_string(iter_number) + "_CFL05_beta"+std::to_string(beta)+".txt";
+    std::string filename = "flowdata_cylinder_nondimensional_N" + std::to_string(N) + "_Re"+std::to_string(Re)+"_iter" + std::to_string(iter_number) + ".txt";
     std::ofstream file(filename);
     for (const auto& row : past) {
         for (const auto& col : row) {
@@ -165,7 +186,7 @@ void saveMatrix(const Matrix& past, int iter_number) {
 }
 
 void saveResidues(const std::vector<std::vector<double>>& residues, int iter_number) {
-    std::string filename = "residues_cylinder2_nondimensional_CPP_N" + std::to_string(N) + "_iter" + std::to_string(iter_number) + "_CFL05_beta"+std::to_string(beta)+".txt";
+    std::string filename = "residues_cylinder_nondimensional_N" + std::to_string(N) + "_Re"+std::to_string(Re)+"_iter" + std::to_string(iter_number) + ".txt";
     std::ofstream file(filename);
 
     // Iterate through the matrix and write each element on a new line
@@ -191,9 +212,11 @@ int main(){
     Matrix deltasCorrect = Matrix(N + 3, std::vector<std::vector<double>>(M + 1, std::vector<double>(3, 0.0)));
 
     std::vector<std::vector<double>> residues;
+    
 
 
     int counter = 0;
+    double time = 0;
     double a = 1; //Will store whether a point is in fluid or in circle
     while (counter < iter) {
     
@@ -218,6 +241,8 @@ int main(){
         double tau = cfl * 1.0 / (((umax_now + std::sqrt(umax_now * umax_now + beta * beta)) / h) +
                                     ((vmax_now + std::sqrt(vmax_now * vmax_now + beta * beta)) / h) + 
                                     2.0 * nu * (1.0 / (h * h) + 1.0 / (h * h)));
+
+        //double tau = 
     
         std::vector<double> sums = {0.0, 0.0, 0.0};
         
@@ -268,7 +293,7 @@ int main(){
                 std::vector<double> brack_hor = scaleVector(inv_h_square, subtractVectors( addVectors (W_right, W_left), scaleVector(2.0, W_this)  ) );
                 std::vector<double> brack_ver = scaleVector(inv_h_square, subtractVectors( addVectors (W_up, W_down), scaleVector(2.0, W_this)  ) );
 
-                std::vector<double> temp = scaleVector(nu, multiplyMatrixWithVector(Dnu, addVectors(brack_hor, brack_ver)));
+                std::vector<double> temp = multiplyMatrixWithVector(Dnu, addVectors(brack_hor, brack_ver));
 
                 std::vector<double> brack = scaleVector(-inv_h, addVectors(subtractVectors(F_this, F_left), subtractVectors(G_this, G_down)));
                 deltaWpredict = multiplyMatrixWithVector(invDbeta, addVectors(temp, brack));
@@ -283,6 +308,7 @@ int main(){
             }
         }
         
+         // Top, bottom and right border
         // Enforcing Neuman Conditions
         for (int k = 0; k < N + 3; ++k) {
             // Pressure/U speed/V speed dont change between the bottom (or top) two layers
@@ -360,7 +386,7 @@ int main(){
                 std::vector<double> brack_hor = scaleVector(inv_h_square, subtractVectors( addVectors (W_right, W_left), scaleVector(2.0, W_this)  ) );
                 std::vector<double> brack_ver = scaleVector(inv_h_square, subtractVectors( addVectors (W_up, W_down), scaleVector(2.0, W_this)  ) );
 
-                std::vector<double> temp = scaleVector(nu, multiplyMatrixWithVector(Dnu, addVectors(brack_hor, brack_ver)));
+                std::vector<double> temp = multiplyMatrixWithVector(Dnu, addVectors(brack_hor, brack_ver));
 
                 std::vector<double> brack = scaleVector(-inv_h, addVectors(subtractVectors(F_right, F_this), subtractVectors(G_up, G_this)));
                 std::vector<double> deltaWCorrect = multiplyMatrixWithVector(invDbeta, addVectors(temp, brack));
@@ -369,20 +395,35 @@ int main(){
 
                 // Compute residue and save values
                 
-                std::vector<double> deltaW = scaleVector(0.5, addVectors(deltasPredict[i][j], deltasCorrect[i][j])); // Replace with actual deltaW calculation
-                sums[0] += deltaW[0] * deltaW[0];
-                sums[1] += deltaW[1] * deltaW[1];
-                sums[2] += deltaW[2] * deltaW[2];
+
+                //Check if here isnt the reason for why residues are not going down??? the difference comes from the edge of the circle
+                std::vector<double> deltaW = scaleVector(0.5, addVectors(deltasPredict[i][j], deltasCorrect[i][j]));
+
                 a = initial_matrix[i][j][5];
-                past[i][j][0] = past[i][j][0] + tau*deltaW[0];
-                past[i][j][1] = a*(past[i][j][1] + tau*deltaW[1]);
-                past[i][j][2] = a*(past[i][j][2] + tau*deltaW[2]);
+
+                double old_p = past[i][j][0];
+                double old_u = past[i][j][1];
+                double old_v = past[i][j][2];
+
+                double new_p = past[i][j][0] + tau*deltaW[0];
+                double new_u = a*(past[i][j][1] + tau*deltaW[1]);
+                double new_v = a*(past[i][j][2] + tau*deltaW[2]);
+
+                sums[0] += (new_p - old_p)*(new_p - old_p);
+                sums[1] += (new_u - old_u)*(new_u - old_u);
+                sums[2] += (new_v - old_v)*(new_v - old_v);
+
+
+                past[i][j][0] = new_p;
+                past[i][j][1] = new_u;
+                past[i][j][2] = new_v;
 
 
             }
         }
 
         
+         // Top, bottom and right border
         // Enforcing Neuman Conditions
         for (int k = 0; k < N + 3; ++k) {
             // Pressure/U speed/V speed dont change between the bottom (or top) two layers
@@ -424,6 +465,7 @@ int main(){
 
         residues.push_back({residual_p, residual_u, residual_v});
         
+        time = time + tau;
         if(counter % 10 == 0){
         std::cout << "***************************************************************\n";
         std::cout << "Case Custom BC: N=" << N << ", M=" << M << ", L=" << L << ", H=" << H << ", Re=" << Re << ", beta=" << beta <<  "\n";
@@ -431,24 +473,24 @@ int main(){
         std::cout << "U max: " << umax_now << "\n";
         std::cout << "V max: " << vmax_now << "\n";
         std::cout << "P max: " << p_max << "          P min:" << p_min << "\n";
+        std::cout << "Time: " << time << "\n";
         std::cout << "Tau: " << tau << "\n";
         std::cout << "Residuum u: " << residual_u << "\n";
         std::cout << "Residuum v: " << residual_v << "\n";
         std::cout << "Residuum p: " << residual_p << "\n";
         }
 
-        if(counter % 20000 == 0){
-            saveMatrix(past, counter);
+        if(counter % 10000 == 0){
+            //saveMatrix(past, counter);
+            saveMatrixWithTime(past, counter, time);
+        }
+
+        if(counter % 10000 == 0){
             saveResidues(residues, counter);
         }
 
-
         counter++;
     }
-    
-
-    saveMatrix(past, iter);
-    saveResidues(residues, iter);
 
     return 0;
 

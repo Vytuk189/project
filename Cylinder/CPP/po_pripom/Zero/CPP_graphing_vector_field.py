@@ -1,17 +1,21 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.colors import ListedColormap
 
-case = 2
-N = 50
-iterations = 20000
+N = 100
+iterations = 93000
+
+
 bound = "Custom"
-Re = 10
+Re = 80
 
 # Initialize a list to store rows
 data = []
-file_path = 'flowdata_cylinder2_nondimensional_CPP_N'+str(N)+'_Re'+str(Re)+'.000000_iter'+str(iterations)+'_CFL05.txt'
+file_path = 'flowdata_cylinder_nondimensional_N'+str(N)+'_Re'+str(Re)+'.000000_iter'+str(iterations)+'.txt'
 # Open and read the file
 with open(file_path, 'r') as file:
+    first_line = file.readline().strip()
+    time = float(first_line)
     for line in file:
         # Clean the line to remove extra spaces and newlines
         line = line.strip()
@@ -41,6 +45,7 @@ u_speeds = np.empty_like(past, dtype=np.float64)
 v_speeds = np.empty_like(past, dtype=np.float64)
 x_coords = np.empty_like(past, dtype=np.float64)
 y_coords = np.empty_like(past, dtype=np.float64)
+structure = np.empty_like(past, dtype=np.float64)
 
 # Loop over each element in the past matrix to extract the corresponding subelements
 for i in range(past.shape[0]):  # Iterate over rows
@@ -50,6 +55,7 @@ for i in range(past.shape[0]):  # Iterate over rows
         v_speeds[i, j] = past[i, j][2]  # Third subelement
         x_coords[i, j] = past[i, j][3]
         y_coords[i, j] = past[i, j][4]
+        structure[i, j] = past[i, j][5]
 
 # Assuming 'u_speeds', 'x_coords', and 'y_coords' arrays are already available
 
@@ -59,6 +65,18 @@ y_vals = np.unique(y_coords)
 
 # Generate a 2D grid based on unique x and y coordinates
 X, Y = np.meshgrid(x_vals, y_vals)
+
+
+# Initialize an empty grid for u_speeds
+structure_grid = np.zeros((len(y_vals), len(x_vals)))
+
+# Map the u_speeds values to their correct coordinates
+for i in range(len(x_coords)):
+    x_index = np.searchsorted(x_vals, x_coords[i])
+    y_index = np.searchsorted(y_vals, y_coords[i])
+    structure_grid[y_index, x_index] = structure[i]
+    
+mask = structure_grid == 0
 
 # Initialize an empty grid for u_speeds
 u_speeds_grid = np.zeros((len(y_vals), len(x_vals)))
@@ -80,9 +98,11 @@ for i in range(len(x_coords)):
 
 # Plot streamlines
 plt.figure(figsize=(10, 5))
-plt.streamplot(X, Y, u_speeds_grid, v_speeds_grid, color='black', linewidth=0.5, density=2, integration_direction='both')
+plt.streamplot(X, Y, u_speeds_grid, v_speeds_grid, color='black', linewidth=0.7, density=2, integration_direction='both', arrowstyle = '-', minlength=0.5)
 plt.xlabel('x')
 plt.ylabel('y')
 plt.title('Proudnice při ' + bound + ', Re = ' + str(Re) + ', N = ' + str(N))
+# Plot the second mesh, only where binary_data is 0, set color to white
+cmap_binary = ListedColormap(["none", "black"])
+plt.pcolormesh(X, Y, mask, shading='auto', cmap=cmap_binary)
 plt.show()
-
