@@ -61,7 +61,7 @@ std::vector<double> multiplyMatrixWithVector(const std::vector<std::vector<doubl
 const double rho = 1.0; // Density
 const double L = 2.0; // Length of channel
 const double H = 1; // Height of channel
-const double Re = 80;
+const double Re = 200;
 
 /* 1/Re takes the same place in the formula with nondimensional values,
      as nu in the formula with dimensional values.
