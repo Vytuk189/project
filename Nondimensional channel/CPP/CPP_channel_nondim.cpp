@@ -81,7 +81,7 @@ std::vector<std::vector<double>> invDbeta = {{ beta*beta,  0, 0},
 
 const double cfl = 0.5;
 const int iter = 800000; // Number of iterations
-const int N = 500; // Number of points in x direction
+const int N = 20; // Number of points in x direction
 const int M = static_cast<int>(H / (L / N)); // Number of points in y direction
 const double h = L / N; // Space step
 
@@ -121,7 +121,7 @@ Matrix createInitialMatrix() {
 }
 
 void saveMatrix(const Matrix& past, int counter) {
-    std::string filename = "flowdata_channel_nondimensional_CPP_N" + std::to_string(N) + "_iter" + std::to_string(counter) + "_CFL05_beta"+std::to_string(beta)+".txt";
+    std::string filename = "flowdata_channel_nondimensional_N" + std::to_string(N) + "_iter" + std::to_string(counter) + "_CFL05_beta"+std::to_string(beta)+".txt";
     std::ofstream file(filename);
     for (const auto& row : past) {
         for (const auto& col : row) {
@@ -156,6 +156,20 @@ void saveResidues(const std::vector<std::vector<double>>& residues, int counter)
     std::cout << "Residues saved to " << "residues_CPP.txt" << std::endl;
 }
 
+void saveTimes(const std::vector<double>& times, int counter) {
+    std::string filename = "times_channel_nondimensional_CPP_N" + std::to_string(N) + "_iter" + std::to_string(counter) + "_CFL05_beta"+std::to_string(beta)+".txt";
+    std::ofstream file(filename);
+
+    // Iterate through the matrix and write each element on a new line
+    for (const auto& time : times) {
+        file << time << std::endl;  // Write the element to the file, each on a new line
+    }
+
+    // Close the file
+    file.close();
+    std::cout << "Times saved to " << filename << std::endl;
+}
+
 
 int main(){
 
@@ -167,9 +181,12 @@ int main(){
     Matrix deltasCorrect = Matrix(N + 3, std::vector<std::vector<double>>(M + 1, std::vector<double>(3, 0.0)));
 
     std::vector<std::vector<double>> residues;
+    std::vector<double> times;
 
 
     int counter = 0;
+    double time = 0;
+    
 
     while (counter < iter) {
     
@@ -370,6 +387,7 @@ int main(){
         double residual_v = std::sqrt(sums[2] / tau)/(N*M);
 
         residues.push_back({residual_p, residual_u, residual_v});
+        times.push_back(time);
         
         if(counter%10 == 0) {
             std::cout << "***************************************************************\n";
@@ -378,23 +396,28 @@ int main(){
             std::cout << "U max: " << umax_now << "\n";
             std::cout << "V max: " << vmax_now << "\n";
             std::cout << "P max: " << p_max << "          P min:" << p_min << "\n";
+            std::cout << "Time: " << time << "\n";
             std::cout << "Tau: " << tau << "\n";
             std::cout << "Residuum u: " << residual_u << "\n";
             std::cout << "Residuum v: " << residual_v << "\n";
             std::cout << "Residuum p: " << residual_p << "\n";
         }
 
-        if(counter%20000 == 0) {
+        time = time + tau;
+
+        if(counter%10000 == 0) {
             saveMatrix(past, counter);
             saveResidues(residues, counter);
+            saveTimes(times, counter);
         }
 
-
+        
         counter++;
     }
     
     saveMatrix(past, iter);
     saveResidues(residues, iter);
+    saveTimes(times, counter);
 
     return 0;
 
