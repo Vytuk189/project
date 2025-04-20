@@ -10,7 +10,7 @@ Re = 10
 
 # Initialize a list to store rows
 data = []
-file_path = 'DFGRe100_NR20.000000_Iter175100.txt'
+file_path = 'flowdata_cylinder_NR20.000000_Re2.000000_Iter0.txt'
 # Open and read the file
 with open(file_path, 'r') as file:
     # # # Read the first line to get the double value
