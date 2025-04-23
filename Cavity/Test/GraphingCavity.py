@@ -96,7 +96,7 @@ for x in X.T:  # Iterate over the columns (x-coordinates), transpose X for this
 N = len(x_vals)
 M = len(y_vals)
 DN = 40
-plt.title("Síť " + str(N) + "x" + str(M) + ", $D_{N}$ = " + str(DN))
+plt.title("Síť 100x75")
 plt.xlabel("X")
 plt.ylabel("Y")
 plt.grid(False)
@@ -136,7 +136,7 @@ for i in range(len(x_coords)):
 plt.figure(figsize=(10, 5))
 plt.pcolormesh(X, Y, u_speeds_grid, cmap='jet', shading='auto')
 plt.colorbar(label='U')
-plt.title('Horizontální rychlost U při ' + bound + ', Re = ' + str(Re) + ', N = ' + str(N))
+plt.title('Re = 40: Horizontální rychlost U')
 plt.xlabel('x')
 plt.ylabel('y')
 plt.gca().set_aspect('equal', adjustable='box')  # Ensure axes are proportional
@@ -161,7 +161,7 @@ for i in range(len(x_coords)):
 plt.figure(figsize=(10, 5))
 plt.pcolormesh(X, Y, v_speeds_grid, cmap='jet', shading='auto')
 plt.colorbar(label='V')
-plt.title('Vertikální rychlost V při ' + bound + ', Re = ' + str(Re) + ', N = ' + str(N))
+plt.title('Re = 40: Vertikální rychlost V')
 plt.xlabel('x')
 plt.ylabel('y')
 plt.gca().set_aspect('equal', adjustable='box')  # Ensure axes are proportional
@@ -185,7 +185,7 @@ for i in range(len(x_coords)):
 plt.figure(figsize=(10, 5))
 plt.pcolormesh(X, Y, speeds_grid, cmap='jet', shading='auto')
 plt.colorbar(label='V')
-plt.title('Celková rychlost při ' + bound + ', Re = ' + str(Re) + ', N = ' + str(N))
+plt.title('Re = 40: celková rychlost')
 plt.xlabel('x')
 plt.ylabel('y')
 plt.gca().set_aspect('equal', adjustable='box')  # Ensure axes are proportional
@@ -214,7 +214,7 @@ for i in range(len(x_coords)):
 plt.figure(figsize=(10, 5))
 plt.pcolormesh(X, Y, pressures_grid, cmap='jet', shading='auto')
 plt.colorbar(label='P')
-plt.title('Tlak P při ' + bound + ', Re = ' + str(Re) + ', N = ' + str(N))
+plt.title('Re = 40: Tlak P')
 plt.xlabel('x')
 plt.ylabel('y')
 plt.gca().set_aspect('equal', adjustable='box')  # Ensure axes are proportional

@@ -136,7 +136,7 @@ for i in range(len(x_coords)):
 plt.figure(figsize=(10, 5))
 plt.pcolormesh(X, Y, u_speeds_grid, cmap='jet', shading='auto')
 plt.colorbar(label='U')
-plt.title('Horizontální rychlost U při ' + bound + ', Re = ' + str(Re) + ', N = ' + str(N))
+plt.title('Re = 80: Horizontální rychlost U')
 plt.xlabel('x')
 plt.ylabel('y')
 plt.gca().set_aspect('equal', adjustable='box')  # Ensure axes are proportional
@@ -160,8 +160,7 @@ for i in range(len(x_coords)):
 # Plot using pcolormesh
 plt.figure(figsize=(10, 5))
 plt.pcolormesh(X, Y, v_speeds_grid, cmap='jet', shading='auto')
-plt.colorbar(label='V')
-plt.title('Vertikální rychlost V při ' + bound + ', Re = ' + str(Re) + ', N = ' + str(N))
+plt.title('Re = 80: Vertikální rychlost V')
 plt.xlabel('x')
 plt.ylabel('y')
 plt.gca().set_aspect('equal', adjustable='box')  # Ensure axes are proportional
@@ -185,7 +184,7 @@ for i in range(len(x_coords)):
 plt.figure(figsize=(10, 5))
 plt.pcolormesh(X, Y, speeds_grid, cmap='jet', shading='auto')
 plt.colorbar(label='V')
-plt.title('Celková rychlost při ' + bound + ', Re = ' + str(Re) + ', N = ' + str(N))
+plt.title('Re = 80: celková rychlost')
 plt.xlabel('x')
 plt.ylabel('y')
 plt.gca().set_aspect('equal', adjustable='box')  # Ensure axes are proportional
@@ -214,7 +213,7 @@ for i in range(len(x_coords)):
 plt.figure(figsize=(10, 5))
 plt.pcolormesh(X, Y, pressures_grid, cmap='jet', shading='auto')
 plt.colorbar(label='P')
-plt.title('Tlak P při ' + bound + ', Re = ' + str(Re) + ', N = ' + str(N))
+plt.title('Re = 80: Tlak P')
 plt.xlabel('x')
 plt.ylabel('y')
 plt.gca().set_aspect('equal', adjustable='box')  # Ensure axes are proportional
@@ -239,18 +238,18 @@ iterations = np.arange(1, data_res.shape[0] + 1)
 
 # Plot the variables
 plt.figure(figsize=(10, 6))
-plt.plot(iterations, var1, label='P Reziduum', color="red")
-plt.plot(iterations, var2, label='U Reziduum', color="blue")
-plt.plot(iterations, var3, label='V Reziduum', color="green")
+plt.plot(iterations, var1, label='P Reziduum', color="red", linewidth=0.8)
+plt.plot(iterations, var2, label='U Reziduum', color="blue", linewidth=0.8)
+plt.plot(iterations, var3, label='V Reziduum', color="green", linewidth=0.8)
 
 # Set y-axis to logarithmic scale
 plt.yscale('log')
-plt.xlim(0, 150000)
+plt.xlim(0, 60000)
 
 # Labeling the plot
 plt.xlabel('Iterace')
 plt.ylabel('Reziduum')
-plt.title('Hodnota reziduí při ' + bound + ', Re = ' + str(Re) + ', N = ' + str(N))
+plt.title('Re = 10: Rezidua')
 plt.legend()
 plt.grid(True, which='both', linestyle='--', linewidth=0.5)
 

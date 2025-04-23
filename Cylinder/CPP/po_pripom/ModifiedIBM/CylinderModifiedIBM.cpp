@@ -61,7 +61,7 @@ std::vector<double> multiplyMatrixWithVector(const std::vector<std::vector<doubl
 const double rho = 1.0; // Density
 const double L = 2; // Length of channel
 const double H = 1; // Height of channel
-const double Re = 80;
+const double Re = 2;
 
 /* 1/Re takes the same place in the formula with nondimensional values,
      as nu in the formula with dimensional values.
@@ -104,7 +104,7 @@ const double nu = (u_in*2*R)/Re;
 
 using Matrix = std::vector<std::vector<std::vector<double>>>;
 
-const double max_node_density = 20; //Pocet uzlu na R
+const double max_node_density = 10; //Pocet uzlu na R
 const double delta_x_min = R/max_node_density;
 const double delta_y_min = R/max_node_density;
 

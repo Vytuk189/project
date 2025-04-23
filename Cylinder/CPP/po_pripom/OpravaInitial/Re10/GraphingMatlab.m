@@ -2,7 +2,7 @@ Re = 10;
 N = 100;
 
 % Open the file
-filename = 'flowdata_cylinder_NR20.000000_Re10.000000_Iter9000.txt';
+filename = '.txt';
 fileID = fopen(filename, 'r');
 
 % % Read the first line (simulation time)
