@@ -160,6 +160,7 @@ for i in range(len(x_coords)):
 # Plot using pcolormesh
 plt.figure(figsize=(10, 5))
 plt.pcolormesh(X, Y, v_speeds_grid, cmap='jet', shading='auto')
+plt.colorbar(label='V')
 plt.title('Re = 80: Vertikální rychlost V')
 plt.xlabel('x')
 plt.ylabel('y')
@@ -249,9 +250,9 @@ plt.xlim(0, 60000)
 # Labeling the plot
 plt.xlabel('Iterace')
 plt.ylabel('Reziduum')
-plt.title('Re = 10: Rezidua')
+plt.title('Re = 80: Rezidua')
 plt.legend()
-plt.grid(True, which='both', linestyle='--', linewidth=0.5)
+plt.grid(True, which='both', linestyle='--', linewidth=1)
 
 # Display the plot
 plt.show()

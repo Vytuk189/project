@@ -15,47 +15,6 @@ The flow is viscous - cylinder is placed in the middle and the flow distortion s
 #include <fstream>
 #include <string>
 
-
-std::vector<double> scaleVector(double scale, std::vector<double> vec) {
-    std::vector<double> result(vec.size());
-    for (size_t i = 0; i < vec.size(); ++i) {
-        result[i] = scale*vec[i];
-    }
-    return result;
-}
-
-std::vector<double> addVectors(std::vector<double> vec1, std::vector<double> vec2) {
-    std::vector<double> result(vec1.size());
-    for (size_t i = 0; i < vec1.size(); ++i) {
-        result[i] = vec1[i] + vec2[i];
-    }
-    return result;
-}
-
-std::vector<double> subtractVectors(std::vector<double> vec1, std::vector<double> vec2) {
-    std::vector<double> result(vec1.size());
-    for (size_t i = 0; i < vec1.size(); ++i) {
-        result[i] = vec1[i] - vec2[i];
-    }
-    return result;
-}
-
-std::vector<double> multiplyMatrixWithVector(const std::vector<std::vector<double>>& matrix, const std::vector<double>& vec) {
-   
-   // Initialize the result vector with the correct size (number of rows in the matrix)
-    std::vector<double> result(matrix.size(), 0.0);
-
-    // Perform matrix-vector multiplication
-    for (size_t i = 0; i < matrix.size(); ++i) {
-        for (size_t j = 0; j < matrix[i].size(); ++j) {
-            result[i] += matrix[i][j] * vec[j];
-        }
-    }
-
-    return result;
-}
-
-
 // Flow and channel conditions
 const double rho = 1.0; // Density
 const double L = 2; // Length of channel
@@ -104,7 +63,7 @@ const double nu = (u_in*2*R)/Re;
 
 using Matrix = std::vector<std::vector<std::vector<double>>>;
 
-const double max_node_density = 40; //Pocet uzlu na R
+const double max_node_density = 25; //Pocet uzlu na R
 const double delta_x_min = R/max_node_density;
 const double delta_y_min = R/max_node_density;
 

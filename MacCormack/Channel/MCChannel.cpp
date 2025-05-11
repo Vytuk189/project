@@ -12,51 +12,11 @@ The flow is solved for non-dimensional pressure and speeds
 #include <fstream>
 #include <string>
 
-std::vector<double> scaleVector(double scale, std::vector<double> vec) {
-    std::vector<double> result(vec.size());
-    for (size_t i = 0; i < vec.size(); ++i) {
-        result[i] = scale*vec[i];
-    }
-    return result;
-}
-
-std::vector<double> addVectors(std::vector<double> vec1, std::vector<double> vec2) {
-    std::vector<double> result(vec1.size());
-    for (size_t i = 0; i < vec1.size(); ++i) {
-        result[i] = vec1[i] + vec2[i];
-    }
-    return result;
-}
-
-std::vector<double> subtractVectors(std::vector<double> vec1, std::vector<double> vec2) {
-    std::vector<double> result(vec1.size());
-    for (size_t i = 0; i < vec1.size(); ++i) {
-        result[i] = vec1[i] - vec2[i];
-    }
-    return result;
-}
-
-std::vector<double> multiplyMatrixWithVector(const std::vector<std::vector<double>>& matrix, const std::vector<double>& vec) {
-   
-   // Initialize the result vector with the correct size (number of rows in the matrix)
-    std::vector<double> result(matrix.size(), 0.0);
-
-    // Perform matrix-vector multiplication
-    for (size_t i = 0; i < matrix.size(); ++i) {
-        for (size_t j = 0; j < matrix[i].size(); ++j) {
-            result[i] += matrix[i][j] * vec[j];
-        }
-    }
-
-    return result;
-}
-
-
 // Flow and channel conditions
 const double rho = 10.0; // Density
 const double L = 2.0; // Length of channel
 const double H = 1.0; // Height of channel
-const double Re = 200;
+const double Re = 1;
 
 /* 1/Re takes the same place in the formula with nondimensional values,
      as nu in the formula with dimensional values.
@@ -65,19 +25,6 @@ const double Re = 200;
 const double nu = 1.0 / Re;
 
 const double beta = 1.0;
-
-std::vector<std::vector<double>> D ={{1, 0, 0},
-                                    {0, 1, 0},
-                                    {0, 0, 1}};
-
-std::vector<std::vector<double>> Dbeta = {{1/(beta*beta), 0, 0},
-                                          {     0       , 1, 0},
-                                          {     0       , 0, 1}};
-
-std::vector<std::vector<double>> invDbeta = {{ beta*beta,  0, 0},
-                                             {  0       ,  1, 0},
-                                             {  0       ,  0, 1}};                                       
-
 
 const double cfl = 0.5;
 const int iter = 800000; // Number of iterations
